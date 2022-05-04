@@ -52,12 +52,14 @@ def group_lines(lines):
         else:
             found = False
             for cluster in clusters:
-                if abs(cluster[0] - angle) < 0.1:
+                if abs(cluster[0] - angle) < np.pi/6:
                     cluster[1].append(line)
                     found = True
                     break
             if not found:
                 clusters.append([angle, [line]])
+
+    clusters.sort(key=lambda x: len(x[1]), reverse=True)
     return clusters
 
 def find_closest_line(line, lines):
@@ -77,6 +79,9 @@ def find_closest_line(line, lines):
 def save_plot(file, image, lines, edges):
     # Generating figure 2
 
+    clusters = group_lines(lines)
+    print(len(clusters))
+
     fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
     ax = axes.ravel()
 
@@ -87,9 +92,13 @@ def save_plot(file, image, lines, edges):
     ax[1].set_title('Isolated Vines')
 
     ax[2].imshow(edges * 0)
-    for line in lines:
-        p0, p1 = line
-        ax[2].plot((p0[0], p1[0]), (p0[1], p1[1]))
+    i=0
+    for (angle, cluster) in clusters:
+        for line in cluster:
+            p0, p1 = line
+            color = 'r' if i == 0 else 'b'
+            ax[2].plot((p0[0], p1[0]), (p0[1], p1[1]), color=color)
+        i += 1
     ax[2].set_xlim((0, image.shape[1]))
     ax[2].set_ylim((image.shape[0], 0))
     ax[2].set_title('Probabilistic Hough')
@@ -99,7 +108,8 @@ def save_plot(file, image, lines, edges):
         #a.set_adjustable('box-forced')
 
     plt.tight_layout()
-    plt.savefig("output/" + file.split("/")[-1])
+    plt.show()
+    #plt.savefig("output/" + file.split("/")[-1])
     plt.close()
 
 
