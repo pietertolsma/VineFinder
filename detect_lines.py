@@ -16,6 +16,64 @@ def mask_vine(image):
     hue_mask = (hsv[:,:,0] > 0.080) * (hsv[:,:, 0] < 0.360)
     return rgb2gray(image) * saturation_mask * hue_mask
 
+def gaussian_mask(size, sigma):
+    """
+    Generates a gaussian mask.
+    """
+    x = np.arange(-size // 2 + 1., size // 2 + 1.)
+    y = x[:, np.newaxis]
+    return np.exp(-((x**2 + y**2) / (2.0 * sigma**2)))
+
+def find_angles(lines):
+    """
+    Finds the angle of every line segment.
+    """
+    angles = []
+    for line in lines:
+        p0, p1 = line
+        angles.append(np.arctan2(p1[1] - p0[1], p1[0] - p0[0]))
+
+def get_angle(line):
+    """
+    Finds the angle of a line.
+    """
+    p0, p1 = line
+    return np.arctan2(p1[1] - p0[1], p1[0] - p0[0])
+
+def group_lines(lines):
+    """
+    Groups lines into clusters of size n, where each cluster has a similar angle and has adjacent lines.
+    """
+    clusters = []
+    for line in lines:
+        angle = get_angle(line)
+        if len(clusters) == 0:
+            clusters.append([angle, [line]])
+        else:
+            found = False
+            for cluster in clusters:
+                if abs(cluster[0] - angle) < 0.1:
+                    cluster[1].append(line)
+                    found = True
+                    break
+            if not found:
+                clusters.append([angle, [line]])
+    return clusters
+
+def find_closest_line(line, lines):
+    """
+    Finds the closest line to a given line.
+    """
+    closest_line = None
+    closest_distance = None
+    for l in lines:
+        p0, p1 = l
+        distance = np.sqrt((p0[0] - line[0][0])**2 + (p0[1] - line[0][1])**2)
+        if closest_distance is None or distance < closest_distance:
+            closest_distance = distance
+            closest_line = l
+    return closest_line
+
 def save_plot(file, image, lines, edges):
     # Generating figure 2
 
