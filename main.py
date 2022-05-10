@@ -29,4 +29,3 @@ if __name__ == '__main__':
 
     f = files[0]
     lines = detect_lines(f)
-    all_tracks(lines,0.5,0.1)

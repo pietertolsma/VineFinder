@@ -76,11 +76,11 @@ def find_closest_line(line, lines):
             closest_line = l
     return closest_line
 
-def save_plot(file, image, lines, edges):
+def save_plot(file, image, tracks, edges):
     # Generating figure 2
 
-    clusters = group_lines(lines)
-    print(len(clusters))
+    # clusters = group_lines(lines)
+    # print(len(clusters))
 
     fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
     ax = axes.ravel()
@@ -93,12 +93,24 @@ def save_plot(file, image, lines, edges):
 
     ax[2].imshow(edges * 0)
     i=0
-    for (angle, cluster) in clusters:
-        for line in cluster:
+    # for (angle, cluster) in clusters:
+    #     for line in cluster:
+    #         p0, p1 = line
+    #         color = 'r' if i == 0 else 'b'
+    #         ax[2].plot((p0[0], p1[0]), (p0[1], p1[1]), color=color)
+    #     i += 1
+
+    i = 0
+
+    color = iter(cm.rainbow(np.linspace(0, 1, len(tracks))))
+
+    for track in tracks:
+        thiscolor = next(color)
+        for line in track:
             p0, p1 = line
-            color = 'r' if i == 0 else 'b'
-            ax[2].plot((p0[0], p1[0]), (p0[1], p1[1]), color=color)
+            ax[2].plot((p0[0], p1[0]), (p0[1], p1[1]), color=thiscolor)
         i += 1
+
     ax[2].set_xlim((0, image.shape[1]))
     ax[2].set_ylim((image.shape[0], 0))
     ax[2].set_title('Probabilistic Hough')
@@ -123,8 +135,9 @@ def detect_lines(img):
     edges = canny(image, sigma=4)
     lines = probabilistic_hough_line(edges, threshold=10, line_length=5,
                                     line_gap=3)
+    tracks = all_tracks(lines,0.5,0.1)
 
-    save_plot(img, image, lines, edges)
+    save_plot(img, image, tracks, edges)
     
     return lines
 
@@ -135,7 +148,7 @@ def lines_angle(a,b):
     aa = get_angle(a)
     ab = get_angle(b)
 
-    return max(a-b,b-a)
+    return max(aa-ab,ab-aa)
 
 def line_distance(a, b):
     p0, p1 = a
@@ -178,3 +191,4 @@ def all_tracks(lines, lengthCutoff = 0.1, angleCutoff = 0.1):
     tracks = []
     for line in lines:
         tracks.append(connect_lines([line],[],lines,lengthCutoff, angleCutoff))
+    return tracks
