@@ -2,7 +2,7 @@ import os
 import time
 import pandas as pd
 
-from detect_lines import detect_lines
+from detect_lines import *
 
 def fetch_files(path):
     """
@@ -20,12 +20,13 @@ if __name__ == '__main__':
     
     index = 0
     results = []
-    for file in files:
-        lines = detect_lines(file)
-        results.append({"file": file, "lines": lines})
-        if index > 0 and index % 10 == 0:
-            print(f"Processed {index} files out of {len(files)}")
-        index += 1
-    
-    df = pd.DataFrame(data=results, columns=["file", "lines"])
-    df.to_csv(f"output/lines-{time.time()}.csv")
+    # for file in files:
+    #     lines = detect_lines(file)
+    #     results.append({"file": file, "lines": lines})
+    #     if index > 0 and index % 10 == 0:
+    #         print(f"Processed {index} files out of {len(files)}")
+    #     index += 1
+
+    f = files[0]
+    lines = detect_lines(f)
+    all_tracks(lines,0.5,0.1)

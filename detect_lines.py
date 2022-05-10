@@ -143,8 +143,8 @@ def line_distance(a, b):
 
     return min(point_distance(p0,p2), point_distance(p0,p3), point_distance(p1,p2), point_distance(p1,p3))
 
-def connect_lines(current, used, lines, cutoff=1):
-    lowestAngle = 100
+def connect_lines(current, used, lines, lengthCutoff, angleCutoff):
+    lowestAngle = angleCutoff
     lowestLine = []
     front = -1
     for line in lines:
@@ -152,13 +152,13 @@ def connect_lines(current, used, lines, cutoff=1):
             current = [line]
             continue
 
-        if line_distance(current[0],line) < cutoff and lines_angle(current[0],line) < lowestAngle and line not in used:
+        if line_distance(current[0],line) < lengthCutoff and lines_angle(current[0],line) < lowestAngle and line not in used:
             # current.insert(0,line)
             lowestAngle = lines_angle(current[0],line)
             lowestLine = line
             front = 0
 
-        if line_distance(current[-1],line) < cutoff and lines_angle(current[-1],line) < lowestAngle and line not in used:
+        if line_distance(current[-1],line) < lengthCutoff and lines_angle(current[-1],line) < lowestAngle and line not in used:
             # current.append(line)
             lowestAngle = lines_angle(current[-1], line)
             lowestLine = line
@@ -172,9 +172,9 @@ def connect_lines(current, used, lines, cutoff=1):
         current.append(lowestLine)
 
     used.append(lowestLine)
-    return connect_lines(current,used,lines,cutoff)
+    return connect_lines(current,used,lines,lengthCutoff, angleCutoff)
 
-def all_tracks(lines, cutoff = 0.1):
+def all_tracks(lines, lengthCutoff = 0.1, angleCutoff = 0.1):
     tracks = []
     for line in lines:
-        tracks.append(connect_lines([line],[],lines,cutoff))
+        tracks.append(connect_lines([line],[],lines,lengthCutoff, angleCutoff))
