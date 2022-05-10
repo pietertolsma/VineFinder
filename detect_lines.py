@@ -127,3 +127,54 @@ def detect_lines(img):
     save_plot(img, image, lines, edges)
     
     return lines
+
+def point_distance(a,b):
+    return np.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2)
+
+def lines_angle(a,b):
+    aa = get_angle(a)
+    ab = get_angle(b)
+
+    return max(a-b,b-a)
+
+def line_distance(a, b):
+    p0, p1 = a
+    p2, p3 = b
+
+    return min(point_distance(p0,p2), point_distance(p0,p3), point_distance(p1,p2), point_distance(p1,p3))
+
+def connect_lines(current, used, lines, cutoff=1):
+    lowestAngle = 100
+    lowestLine = []
+    front = -1
+    for line in lines:
+        if not current:
+            current = [line]
+            continue
+
+        if line_distance(current[0],line) < cutoff and lines_angle(current[0],line) < lowestAngle and line not in used:
+            # current.insert(0,line)
+            lowestAngle = lines_angle(current[0],line)
+            lowestLine = line
+            front = 0
+
+        if line_distance(current[-1],line) < cutoff and lines_angle(current[-1],line) < lowestAngle and line not in used:
+            # current.append(line)
+            lowestAngle = lines_angle(current[-1], line)
+            lowestLine = line
+            front = 1
+
+    if front == -1:
+        return current
+    elif front == 0:
+        current.insert(0, lowestLine)
+    elif front == 1:
+        current.append(lowestLine)
+
+    used.append(lowestLine)
+    return connect_lines(current,used,lines,cutoff)
+
+def all_tracks(lines, cutoff = 0.1):
+    tracks = []
+    for line in lines:
+        tracks.append(connect_lines([line],[],lines,cutoff))
