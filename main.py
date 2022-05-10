@@ -20,12 +20,12 @@ if __name__ == '__main__':
     
     index = 0
     results = []
-    # for file in files:
-    #     lines = detect_lines(file)
-    #     results.append({"file": file, "lines": lines})
-    #     if index > 0 and index % 10 == 0:
-    #         print(f"Processed {index} files out of {len(files)}")
-    #     index += 1
+    for file in files:
+        lines = detect_lines(file)
+        # results.append({"file": file, "lines": lines})
+        # if index > 0 and index % 10 == 0:
+        #     print(f"Processed {index} files out of {len(files)}")
+        # index += 1
 
-    f = files[0]
-    lines = detect_lines(f)
+    # f = files[0]
+    # lines = detect_lines(f)

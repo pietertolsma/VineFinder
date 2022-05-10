@@ -104,6 +104,9 @@ def save_plot(file, image, tracks, edges):
 
     color = iter(cm.rainbow(np.linspace(0, 1, len(tracks))))
 
+    sizes = list(map(lambda x: len(x), tracks))
+    print(str(sizes))
+
     for track in tracks:
         thiscolor = next(color)
         for line in track:
@@ -135,7 +138,7 @@ def detect_lines(img):
     edges = canny(image, sigma=4)
     lines = probabilistic_hough_line(edges, threshold=10, line_length=5,
                                     line_gap=3)
-    tracks = all_tracks(lines,0.5,0.1)
+    tracks = all_tracks(lines, 100, 50)
 
     save_plot(img, image, tracks, edges)
     
@@ -155,6 +158,34 @@ def line_distance(a, b):
     p2, p3 = b
 
     return min(point_distance(p0,p2), point_distance(p0,p3), point_distance(p1,p2), point_distance(p1,p3))
+
+#A function that calculates the total length of all lines in the list
+def total_length(lines):
+    total = 0
+    for line in lines:
+        p0, p1 = line
+        total += point_distance(p0,p1)
+    return total
+
+# A function that connects lines that are near each other and have the same angle.
+def all_tracks(lines, min_length, min_distance):
+    tracks = []
+    while len(lines) > 0:
+        line = lines.pop()
+        track = [line]
+        while True:
+            closest_line = find_closest_line(track[-1], lines)
+            if closest_line is None:
+                break
+            if lines_angle(track[-1], closest_line) > np.pi/6:
+                break
+            if line_distance(track[-1], closest_line) > min_distance:
+                break
+            track.append(closest_line)
+            lines.remove(closest_line)
+        if total_length(track) > min_length:
+            tracks.append(track)
+    return tracks
 
 def connect_lines(current, used, lines, lengthCutoff, angleCutoff):
     lowestAngle = angleCutoff
@@ -187,8 +218,8 @@ def connect_lines(current, used, lines, lengthCutoff, angleCutoff):
     used.append(lowestLine)
     return connect_lines(current,used,lines,lengthCutoff, angleCutoff)
 
-def all_tracks(lines, lengthCutoff = 0.1, angleCutoff = 0.1):
-    tracks = []
-    for line in lines:
-        tracks.append(connect_lines([line],[],lines,lengthCutoff, angleCutoff))
-    return tracks
+# def all_tracks(lines, lengthCutoff = 0.1, angleCutoff = 0.1):
+#     tracks = []
+#     for line in lines:
+#         tracks.append(connect_lines([line],[],lines,lengthCutoff, angleCutoff))
+#     return tracks
