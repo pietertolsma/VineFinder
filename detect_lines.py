@@ -136,7 +136,11 @@ def detect_lines(img):
     lines = probabilistic_hough_line(edges, threshold=10, line_length=5,
                                     line_gap=3)
     tracks = all_tracks(lines,0.5,0.1)
+    avg = 0
+    for t in tracks:
+        avg += len(t)
 
+    print("avg len(track)=={}".format(avg/len(tracks)))
     save_plot(img, image, tracks, edges)
     
     return lines
@@ -190,5 +194,5 @@ def connect_lines(current, used, lines, lengthCutoff, angleCutoff):
 def all_tracks(lines, lengthCutoff = 0.1, angleCutoff = 0.1):
     tracks = []
     for line in lines:
-        tracks.append(connect_lines([line],[],lines,lengthCutoff, angleCutoff))
+        tracks.append(connect_lines([line],[line],lines,lengthCutoff, angleCutoff))
     return tracks
