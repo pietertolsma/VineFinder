@@ -36,9 +36,14 @@ def find_angles(lines):
 def get_angle(line):
     """
     Finds the angle of a line.
+    angle between 0 and pi radians
     """
     p0, p1 = line
-    return np.arctan2(p1[1] - p0[1], p1[0] - p0[0])
+    angle = np.arctan2(p1[1] - p0[1], p1[0] - p0[0])
+    if angle < 0:
+        angle += np.pi
+
+    return angle
 
 def group_lines(lines):
     """
@@ -150,11 +155,21 @@ def detect_lines(img):
     avgCount /= len(tracks)
 
     reduced_tracks = [t for t in tracks if track_length(t) > 2*avg and len(t) > avgCount]
+    angles = [track_angle(t) for t in tracks]
+    print("Angles: ")
+    print(angles)
 
     print("avg len(track)=={}".format(avg))
     save_plot(img, image, reduced_tracks, edges)
     
     return lines
+
+# calculates the angle between the start and end of a track
+def track_angle(track):
+    p0 = track[0][0]
+    p1 = track[-1][0]
+
+    return get_angle([p0,p1])
 
 def point_distance(a,b):
     return np.sqrt((a[0]-b[0])**2 + (a[1]-b[1])**2)
