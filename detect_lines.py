@@ -139,13 +139,20 @@ def detect_lines(img):
     lines = probabilistic_hough_line(edges, threshold=10, line_length=5,
                                     line_gap=3)
 
-    tracks = all_tracks(lines,10,0.1)
+    tracks = all_tracks(lines,10,0.2)
     avg = 0
+    avgCount = 0
     for t in tracks:
         avg += track_length(t)
+        avgCount += len(t)
 
-    print("avg len(track)=={}".format(avg/len(tracks)))
-    save_plot(img, image, tracks, edges)
+    avg /= len(tracks)
+    avgCount /= len(tracks)
+
+    reduced_tracks = [t for t in tracks if track_length(t) > 2*avg and len(t) > avgCount]
+
+    print("avg len(track)=={}".format(avg))
+    save_plot(img, image, reduced_tracks, edges)
     
     return lines
 

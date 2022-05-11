@@ -21,8 +21,8 @@ if __name__ == '__main__':
     index = 0
     results = []
     for file in files:
-        if index > 5:
-            continue
+        if index > 10:
+            break
         index += 1
         lines = detect_lines(file)
         # results.append({"file": file, "lines": lines})
