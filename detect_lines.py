@@ -138,14 +138,11 @@ def detect_lines(img):
     edges = canny(image, sigma=4)
     lines = probabilistic_hough_line(edges, threshold=10, line_length=5,
                                     line_gap=3)
-<<<<<<< HEAD
-    tracks = all_tracks(lines, 100, 50)
-=======
-    tracks = all_tracks(lines,0.5,0.1)
+
+    tracks = all_tracks(lines,10,0.1)
     avg = 0
     for t in tracks:
-        avg += len(t)
->>>>>>> 7c2b29c6d665a9720a54ac624a281491e5d8d5bf
+        avg += track_length(t)
 
     print("avg len(track)=={}".format(avg/len(tracks)))
     save_plot(img, image, tracks, edges)
@@ -226,16 +223,19 @@ def connect_lines(current, used, lines, lengthCutoff, angleCutoff):
     used.append(lowestLine)
     return connect_lines(current,used,lines,lengthCutoff, angleCutoff)
 
-<<<<<<< HEAD
-# def all_tracks(lines, lengthCutoff = 0.1, angleCutoff = 0.1):
-#     tracks = []
-#     for line in lines:
-#         tracks.append(connect_lines([line],[],lines,lengthCutoff, angleCutoff))
-#     return tracks
-=======
+def line_length(line):
+    p0, p1 = line
+    return point_distance(p0, p1)
+
+def track_length(lines):
+    len = 0
+    for line in lines:
+        len += line_length(line)
+
+    return len
+
 def all_tracks(lines, lengthCutoff = 0.1, angleCutoff = 0.1):
     tracks = []
     for line in lines:
         tracks.append(connect_lines([line],[line],lines,lengthCutoff, angleCutoff))
     return tracks
->>>>>>> 7c2b29c6d665a9720a54ac624a281491e5d8d5bf
