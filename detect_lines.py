@@ -139,7 +139,7 @@ def detect_lines(img):
     lines = probabilistic_hough_line(edges, threshold=10, line_length=5,
                                     line_gap=3)
 
-    tracks = all_tracks(lines,10,0.2)
+    tracks = all_tracks(lines,20,0.2)
     avg = 0
     avgCount = 0
     for t in tracks:
