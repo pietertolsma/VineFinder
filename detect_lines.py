@@ -104,7 +104,7 @@ def save_plot(file, image, tracks, edges):
 
     color = iter(cm.rainbow(np.linspace(0, 1, len(tracks))))
 
-    sizes = list(map(lambda x: len(x), tracks))
+    sizes = list(map(lambda x: track_length(x), tracks))
     print(str(sizes))
 
     for track in tracks:
@@ -232,7 +232,7 @@ def track_length(lines):
     for line in lines:
         len += line_length(line)
 
-    return len
+    return round(len,2)
 
 def all_tracks(lines, lengthCutoff = 0.1, angleCutoff = 0.1):
     tracks = []
