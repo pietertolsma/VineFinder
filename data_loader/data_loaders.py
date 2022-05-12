@@ -1,4 +1,5 @@
 
+from math import floor
 from torchvision import datasets, transforms
 import torchvision.transforms.functional as F
 from torchvision.io import read_image
@@ -21,12 +22,13 @@ class PadImage(object):
         Returns:
             Tensor: Converted image.
         """
-        current_width, current_height = pic.shape[0], pic.shape[1]
+        pic = transforms.Resize(size=(min(pic.shape[1], size[0]), min(pic.shape[2], size[1])))(pic)
+        current_width, current_height = pic.shape[2], pic.shape[1]
         add_width = size[0] - current_width
         add_height = size[1] - current_height
-        padding = (int(add_width / 2), int(add_height / 2), int(add_width - add_width / 2), int(add_height - add_height / 2))
-
-        return F.pad(pic, padding, 0, 'constant')
+        padding = (floor(add_width / 2), floor(add_height / 2), add_width - floor(add_width / 2), add_height - floor(add_height / 2))
+        padded = F.pad(pic, padding, 0, 'constant')
+        return padded
         
 
     def __repr__(self):
