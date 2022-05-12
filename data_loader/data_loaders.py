@@ -27,7 +27,7 @@ class PadImage(object):
         add_width = size[0] - current_width
         add_height = size[1] - current_height
         padding = (floor(add_width / 2), floor(add_height / 2), add_width - floor(add_width / 2), add_height - floor(add_height / 2))
-        padded = F.pad(pic, padding, 0, 'constant')
+        padded = F.pad(pic, padding, 0, 'constant').float()
         return padded
         
 
