@@ -1,5 +1,6 @@
 
 from torchvision import datasets, transforms
+import torchvision.transforms.functional as F
 from torchvision.io import read_image
 from base import BaseDataLoader
 
@@ -8,6 +9,28 @@ from torch.utils.data import Dataset
 import os, os.path
 from PIL import Image
 import numpy as np
+
+class PadImage(object):
+    """
+    """
+
+    def __call__(self, pic, size=(572, 572)):
+        """
+        Args:
+            pic (PIL Image or numpy.ndarray): Image to be converted to tensor.
+        Returns:
+            Tensor: Converted image.
+        """
+        current_width, current_height = pic.shape[0], pic.shape[1]
+        add_width = size[0] - current_width
+        add_height = size[1] - current_height
+        padding = (int(add_width / 2), int(add_height / 2), int(add_width - add_width / 2), int(add_height - add_height / 2))
+
+        return F.pad(pic, padding, 0, 'constant')
+        
+
+    def __repr__(self):
+        return self.__class__.__name__ + '()'
 
 class TomatoImageDataset(Dataset):
     def __init__(self, root_dir, transform=None, mask_transform=None):
@@ -40,31 +63,30 @@ class TomatoDataLoader(BaseDataLoader):
     MNIST data loading demo using BaseDataLoader
     """
 
-    def preprocess(pil_img, scale, is_mask):
-        w, h = pil_img.size
-        newW, newH = int(scale * w), int(scale * h)
-        assert newW > 0 and newH > 0, 'Scale is too small, resized images would have no pixel'
-        pil_img = pil_img.resize((newW, newH), resample=Image.NEAREST if is_mask else Image.BICUBIC)
-        img_ndarray = np.asarray(pil_img)
+    # def preprocess(pil_img, scale, is_mask):
+    #     w, h = pil_img.size
+    #     newW, newH = int(scale * w), int(scale * h)
+    #     assert newW > 0 and newH > 0, 'Scale is too small, resized images would have no pixel'
+    #     pil_img = pil_img.resize((newW, newH), resample=Image.NEAREST if is_mask else Image.BICUBIC)
+    #     img_ndarray = np.asarray(pil_img)
 
-        if not is_mask:
-            if img_ndarray.ndim == 2:
-                img_ndarray = img_ndarray[np.newaxis, ...]
-            else:
-                img_ndarray = img_ndarray.transpose((2, 0, 1))
+    #     if not is_mask:
+    #         if img_ndarray.ndim == 2:
+    #             img_ndarray = img_ndarray[np.newaxis, ...]
+    #         else:
+    #             img_ndarray = img_ndarray.transpose((2, 0, 1))
 
-            img_ndarray = img_ndarray / 255
+    #         img_ndarray = img_ndarray / 255
 
-        return img_ndarray
+    #     return img_ndarray
 
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
         trsfm = transforms.Compose([
-            transforms.Resize(size=(256, 256)),
-            transforms.Grayscale()
+            transforms.Grayscale(),
+            PadImage()
         ])
         m_trsfm = transforms.Compose([
-            transforms.Resize(size=(256, 256)),
-            transforms.FloatToByteTensor()
+            PadImage()
         ])
         self.data_dir = data_dir
         self.dataset = TomatoImageDataset(self.data_dir, transform=trsfm, mask_transform=m_trsfm)
