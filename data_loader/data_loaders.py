@@ -11,6 +11,35 @@ import os, os.path
 from PIL import Image
 import numpy as np
 
+from skimage.color import rgb2hsv, rgb2gray
+from skimage.transform import (probabilistic_hough_line)
+from skimage.feature import canny
+
+class FilterVines(object):
+    """
+    """
+
+    def __call__(self, pic):
+        """
+        Args:
+            pic (PIL Image or numpy.ndarray): Image to be converted to tensor.
+        Returns:
+            Tensor: Converted image.
+        """
+        img = pic.transpose(2, 0)
+        img = img.transpose(0, 1)
+        hsv = rgb2hsv(img)
+        saturation_mask = hsv[:,:,1] > 0.34
+        hue_mask = (hsv[:,:,0] > 0.080) * (hsv[:,:, 0] < 0.360)
+        gray = transforms.Grayscale()(pic)
+        image = gray * saturation_mask * hue_mask
+
+        return image
+        
+
+    def __repr__(self):
+        return self.__class__.__name__ + '()'
+
 class PadImage(object):
     """
     """
@@ -52,6 +81,7 @@ class TomatoImageDataset(Dataset):
 
         image = read_image(img_path)
         mask = read_image(mask_path)
+
         if self.transform:
             image = self.transform(image)
         
@@ -84,7 +114,7 @@ class TomatoDataLoader(BaseDataLoader):
 
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
         trsfm = transforms.Compose([
-            transforms.Grayscale(),
+            FilterVines(),
             PadImage()
         ])
         m_trsfm = transforms.Compose([
