@@ -38,7 +38,9 @@ def multiclass_dice_coeff(input: Tensor, target: Tensor, reduce_batch_first: boo
     return dice / input.shape[1]
 
 
-def dice_loss(pred, target, smooth=1.):
+def dice_loss(pred, target):
     """Dice loss
     """
-    return torch.nn.BCELoss()(torch.nn.Sigmoid(pred), target)
+    loss = torch.nn.BCELoss()
+    input = torch.nn.Sigmoid()(pred)
+    return loss(input, target)
