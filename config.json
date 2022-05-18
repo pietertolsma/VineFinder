@@ -36,14 +36,14 @@
         }
     },
     "trainer": {
-        "epochs": 100,
+        "epochs": 300,
 
         "save_dir": "saved/",
         "save_period": 1,
         "verbosity": 2,
         
         "monitor": "min val_loss",
-        "early_stop": 10,
+        "early_stop": 110,
 
         "tensorboard": true
     }
