@@ -60,6 +60,7 @@ def main(config):
                 transforms.Normalize(1, 1, inplace=True)(data[i, :, :])
                 transforms.Normalize(1, 1, inplace=True)(output[i, :, :])
                 original = data[i, 0, :, :]
+                img = torch.nn.Sigmoid()(output[i])
                 img = output[i,0,:,:]
                 plt.imshow(img, cmap='jet')
                 plt.show()

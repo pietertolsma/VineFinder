@@ -70,8 +70,12 @@ class TomatoImageDataset(Dataset):
     def __init__(self, root_dir, transform=None, mask_transform=None):
         self.img_dir = root_dir + "/images"
         self.img_files = os.listdir(self.img_dir)
+        self.img_files.sort()
+        print(self.img_files)
         self.mask_dir = root_dir + "/masks"
         self.mask_files = os.listdir(self.mask_dir)
+        self.mask_files.sort()
+        print(self.mask_files)
         self.transform = transform
         self.mask_transform = mask_transform
 
@@ -86,12 +90,22 @@ class TomatoImageDataset(Dataset):
         mask = read_image(mask_path)
 
         # Ensure that both random operations are the same
-        seed = np.random.randint(2147483647)
-        torch.manual_seed(seed)
-        random.seed(seed)
+
+        rotation = random.randint(-90, 90)
+        flip = random.uniform(0, 1) > 0.5
+
+        if flip:
+            transforms.functional.hflip(image)
+            transforms.functional.hflip(mask)
+
+        transforms.functional.rotate(mask, rotation)
+        transforms.functional.rotate(image, rotation)
 
         if self.transform:
             image = self.transform(image)
+        
+        if self.mask_transform:
+            mask = self.mask_transform(mask)
 
       #  image[0, :, :] = canny(image[0, :, :], sigma=4)
         image = (image - torch.mean(image)) / torch.std(image)
@@ -102,9 +116,7 @@ class TomatoImageDataset(Dataset):
         # image = image[0, :, :]
         # plt.imshow(image)
         # plt.show()
-        
-        if self.mask_transform:
-            mask = self.mask_transform(mask)
+    
 
         # mask = mask[0, :, :]
         # plt.imshow(mask)
@@ -121,13 +133,9 @@ class TomatoDataLoader(BaseDataLoader):
         trsfm = transforms.Compose([
             FilterVines(),
             PadImage(),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(90),
         ])
         m_trsfm = transforms.Compose([
             PadImage(),
-            transforms.RandomHorizontalFlip(),
-            transforms.RandomRotation(90),
         ])
 
         self.data_dir = data_dir
