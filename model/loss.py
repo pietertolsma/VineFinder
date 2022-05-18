@@ -38,8 +38,11 @@ def multiclass_dice_coeff(input: Tensor, target: Tensor, reduce_batch_first: boo
     return dice / input.shape[1]
 
 
-def dice_loss(input: Tensor, target: Tensor, multiclass: bool = False):
-    # Dice loss (objective to minimize) between 0 and 1
-    assert input.size() == target.size()
-    fn = multiclass_dice_coeff if multiclass else dice_coeff
-    return 1 - fn(input, target, reduce_batch_first=True)
+def dice_loss(pred, target, smooth=1.):
+    """Dice loss
+    """
+    iflat = pred.view(-1)
+    tflat = target.view(-1)
+    intersection = (iflat * tflat).sum()
+    return 1 - ((2. * intersection + smooth) /
+                (iflat.sum() + tflat.sum() + smooth))

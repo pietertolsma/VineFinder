@@ -35,6 +35,7 @@ class FilterVines(object):
         hue_mask = (hsv[:,:,0] > 0.080) * (hsv[:,:, 0] < 0.360)
         gray = transforms.Grayscale()(pic)
         image = gray * saturation_mask * hue_mask
+        image = image + torch.ones(image.shape)
 
         return image
         
@@ -91,9 +92,23 @@ class TomatoImageDataset(Dataset):
 
         if self.transform:
             image = self.transform(image)
+
+      #  image[0, :, :] = canny(image[0, :, :], sigma=4)
+        image = (image - torch.mean(image)) / torch.std(image)
+        image = image * (image < 5.6)
+
+        # import matplotlib.pyplot as plt
+
+        # image = image[0, :, :]
+        # plt.imshow(image)
+        # plt.show()
         
         if self.mask_transform:
             mask = self.mask_transform(mask)
+
+        # mask = mask[0, :, :]
+        # plt.imshow(mask)
+        # plt.show()
 
         return image, mask
 
