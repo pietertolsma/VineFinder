@@ -17,6 +17,7 @@ from skimage.color import rgb2hsv, rgb2gray
 from skimage.transform import (probabilistic_hough_line)
 from skimage.feature import canny
 
+
 class FilterVines(object):
     """
     """
@@ -31,14 +32,13 @@ class FilterVines(object):
         img = pic.transpose(2, 0)
         img = img.transpose(0, 1)
         hsv = rgb2hsv(img)
-        saturation_mask = hsv[:,:,1] > 0.34
-        hue_mask = (hsv[:,:,0] > 0.080) * (hsv[:,:, 0] < 0.360)
+        saturation_mask = hsv[:, :, 1] > 0.34
+        hue_mask = (hsv[:, :, 0] > 0.080) * (hsv[:, :, 0] < 0.360)
         gray = transforms.Grayscale()(pic)
         image = gray * saturation_mask * hue_mask
         image = image + torch.ones(image.shape)
 
         return image
-        
 
     def __repr__(self):
         return self.__class__.__name__ + '()'
@@ -131,7 +131,6 @@ class TomatoDataLoader(BaseDataLoader):
 
     def __init__(self, data_dir, batch_size, shuffle=True, validation_split=0.0, num_workers=1, training=True):
         trsfm = transforms.Compose([
-            FilterVines(),
             PadImage(),
         ])
         m_trsfm = transforms.Compose([
