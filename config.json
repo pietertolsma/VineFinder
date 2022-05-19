@@ -4,16 +4,18 @@
 
     "arch": {
         "type": "UNet",
-        "args": {}
+        "args": {
+            "n_channels": 3
+        }
     },
     "data_loader": {
         "type": "TomatoDataLoader",
         "args":{
-            "data_dir": "data/tomatoes",
-            "batch_size": 9,
+            "data_dir": "data/tomatoes/train",
+            "batch_size": 1,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 2
+            "num_workers": 3
         }
     },
     "optimizer": {

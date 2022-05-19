@@ -16,7 +16,7 @@ def main(config):
 
     # setup data_loader instances
     data_loader = getattr(module_data, config['data_loader']['type'])(
-        config['data_loader']['args']['data_dir'],
+        "data/tomatoes/train",
         batch_size=512,
         shuffle=False,
         validation_split=0.0,
@@ -57,13 +57,34 @@ def main(config):
             #
             print(output.shape)
             for i in range(output.shape[0]):
-                transforms.Normalize(1, 1, inplace=True)(data[i, :, :])
-                transforms.Normalize(1, 1, inplace=True)(output[i, :, :])
-                original = data[i, 0, :, :]
-                img = torch.nn.Sigmoid()(output[i])
+                #transforms.Normalize(1, 1, inplace=True)(data[i, :, :])
+                #transforms.Normalize(1, 1, inplace=True)(output[i, :, :])
+                img = torch.nn.Softmax2d()(output[i])
                 img = output[i,0,:,:]
-                plt.imshow(img, cmap='jet')
+                # plt.imshow(img, cmap='jet')
+                # plt.show()
+
+                fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
+                ax = axes.ravel()
+
+                ax[0].imshow(img, cmap=cm.jet)
+                ax[0].set_title('Prediction')
+
+                ax[1].imshow(target[i, 0, :, :])
+                ax[1].set_title('Target')
+
+                original_input = data[i]
+                original_input = original_input.transpose(0, 2)
+                original_input = original_input.transpose_(0, 1)
+                ax[2].imshow(original_input)
+                ax[2].set_title('Original')
+
+                plt.tight_layout()
                 plt.show()
+                #plt.savefig("output/" + file.split("/")[-1])
+                plt.close()
+
+
 
 
             # computing loss, metrics on test set
