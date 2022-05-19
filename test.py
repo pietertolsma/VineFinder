@@ -50,7 +50,7 @@ def main(config):
     with torch.no_grad():
         for i, (data, target) in enumerate(tqdm(data_loader)):
             data, target = data.to(device), target.to(device)
-            output = model(data)
+            output = model(data[0:5])
 
             #
             # save sample images, or do something with output here
