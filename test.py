@@ -7,6 +7,7 @@ import model.metric as module_metric
 import model.model as module_arch
 from parse_config import ConfigParser
 from torchvision import transforms
+import cv2
 
 from matplotlib import cm
 import matplotlib.pyplot as plt
@@ -54,6 +55,7 @@ def main(config):
 
             a = output
             b = target
+            d = data
             try:
                 output = output.cpu()
             except:
@@ -63,6 +65,11 @@ def main(config):
                 target = target.cpu()
             except:
                 target = b
+
+            try:
+                data = data.cpu()
+            except:
+                data = d
             #
             # save sample images, or do something with output here
             #
