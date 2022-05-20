@@ -1,16 +1,16 @@
 import argparse
+
+import matplotlib.pyplot as plt
 import torch
+from torchvision import transforms
 from tqdm import tqdm
+
 import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
 from parse_config import ConfigParser
-from torchvision import transforms
-import cv2
 
-from matplotlib import cm
-import matplotlib.pyplot as plt
 
 def main(config):
     logger = config.get_logger('test')
