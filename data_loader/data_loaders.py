@@ -108,13 +108,14 @@ class TomatoImageDataset(Dataset):
             mask = self.mask_transform(mask)
 
       #  image[0, :, :] = canny(image[0, :, :], sigma=4)
-        image = (image - torch.mean(image)) / torch.std(image)
-        image = image * (image < 5.6)
+        # standardize image between 0, 1
+        image = image / 255.0
+        #image = image * (image < 5.6)
 
         # import matplotlib.pyplot as plt
 
-        # image = image[0, :, :]
-        # plt.imshow(image)
+        # #tensor_image.permute(1, 2, 0) 
+        # plt.imshow(image.permute(1, 2, 0).float() )
         # plt.show()
     
 
