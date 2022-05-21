@@ -4,7 +4,7 @@ from base import BaseModel
 from .unet_parts import *
 
 class UNet(BaseModel):
-    def __init__(self, n_channels=3, num_classes=1, bilinear=False):
+    def __init__(self, n_channels=1, num_classes=1, bilinear=False):
         super(UNet, self).__init__()
         self.n_channels = n_channels
         self.n_classes = num_classes

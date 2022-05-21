@@ -17,7 +17,7 @@ def main(config):
     # setup data_loader instances
     data_loader = getattr(module_data, config['data_loader']['type'])(
         config['data_loader']['args']['data_dir'],
-        batch_size=3,
+        batch_size=512,
         shuffle=False,
         validation_split=0.0,
         training=False,
@@ -51,18 +51,6 @@ def main(config):
         for i, (data, target) in enumerate(tqdm(data_loader)):
             data, target = data.to(device), target.to(device)
             output = model(data)
-
-            a = output
-            b = target
-            try:
-                output = output.cpu()
-            except:
-                output = a
-
-            try:
-                target = target.cpu()
-            except:
-                target = b
 
             #
             # save sample images, or do something with output here
