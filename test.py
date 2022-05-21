@@ -7,6 +7,7 @@ import model.metric as module_metric
 import model.model as module_arch
 from parse_config import ConfigParser
 from torchvision import transforms
+import cv2
 
 from matplotlib import cm
 import matplotlib.pyplot as plt
@@ -17,7 +18,7 @@ def main(config):
     # setup data_loader instances
     data_loader = getattr(module_data, config['data_loader']['type'])(
         config['data_loader']['args']['data_dir'],
-        batch_size=512,
+        batch_size=3,
         shuffle=False,
         validation_split=0.0,
         training=False,
@@ -52,6 +53,23 @@ def main(config):
             data, target = data.to(device), target.to(device)
             output = model(data)
 
+            a = output
+            b = target
+            d = data
+            try:
+                output = output.cpu()
+            except:
+                output = a
+
+            try:
+                target = target.cpu()
+            except:
+                target = b
+
+            try:
+                data = data.cpu()
+            except:
+                data = d
             #
             # save sample images, or do something with output here
             #

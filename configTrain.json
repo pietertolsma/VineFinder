@@ -9,8 +9,8 @@
     "data_loader": {
         "type": "TomatoDataLoader",
         "args":{
-            "data_dir": "data/tomatoes",
-            "batch_size": 9,
+            "data_dir": "data/tomatoes/train",
+            "batch_size": 3,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 2
@@ -39,11 +39,11 @@
         "epochs": 300,
 
         "save_dir": "saved/",
-        "save_period": 1,
+        "save_period": 5,
         "verbosity": 2,
         
         "monitor": "min val_loss",
-        "early_stop": 110,
+        "early_stop": 10,
 
         "tensorboard": true
     }
