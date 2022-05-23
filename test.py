@@ -78,23 +78,29 @@ def main(config):
                 #transforms.Normalize(1, 1, inplace=True)(output[i, :, :])
                 img = torch.nn.Softmax2d()(output[i])
                 img = output[i,0,:,:]
+
+                maskpred = (img > config["cutoff"]) * 255
+
                 # plt.imshow(img, cmap='jet')
                 # plt.show()
 
-                fig, axes = plt.subplots(1, 3, figsize=(15, 5), sharex=True, sharey=True)
+                fig, axes = plt.subplots(1, 4, figsize=(15, 5), sharex=True, sharey=True)
                 ax = axes.ravel()
 
                 ax[0].imshow(img, cmap=cm.jet)
                 ax[0].set_title('Prediction')
 
                 ax[1].imshow(target[i, 0, :, :])
-                ax[1].set_title('Target')
+                ax[1].set_title('Target mask')
+
+                ax[2].imshow(maskpred)
+                ax[2].set_title('Pred mask')
 
                 original_input = data[i]
                 original_input = original_input.transpose(0, 2)
                 original_input = original_input.transpose_(0, 1)
-                ax[2].imshow(original_input)
-                ax[2].set_title('Original')
+                ax[3].imshow(original_input)
+                ax[3].set_title('Original')
 
                 plt.tight_layout()
                 plt.show()
