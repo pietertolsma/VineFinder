@@ -9,7 +9,7 @@
     "data_loader": {
         "type": "TomatoDataLoader",
         "args":{
-            "data_dir": "data/grabpoints/test",
+            "data_dir": "data/tomatoes/test",
             "batch_size": 3,
             "shuffle": true,
             "validation_split": 0.1,
@@ -24,8 +24,8 @@
             "amsgrad": true
         }
     },
-    "loss": "dice_loss",
-    "cutoff": 0.7,
+    "loss": "bce_loss",
+    "cutoff": 1.5,
     "metrics": [
         "accuracy", "top_k_acc"
     ],

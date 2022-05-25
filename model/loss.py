@@ -39,6 +39,14 @@ def multiclass_dice_coeff(input: Tensor, target: Tensor, reduce_batch_first: boo
 
 
 def dice_loss(pred, target):
+    smooth = 1.
+    iflat = pred.view(-1)
+    tflat = target.view(-1)
+    intersection = (iflat * tflat).sum()
+    return 1 - ((2. * intersection + smooth) /
+                (iflat.sum() + tflat.sum() + smooth))
+
+def bce_loss(pred, target):
     """Dice loss
     """
     loss = torch.nn.BCELoss()

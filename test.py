@@ -11,6 +11,11 @@ from torchvision import transforms
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
+def custom_loss(pred, target):
+    iflat = pred.view(-1)
+    tflat = target.view(-1)
+    return 1 - (iflat - iflat * tflat).sum() / (iflat.sum() + 1e-6)
+
 def main(config):
     logger = config.get_logger('test')
 
@@ -33,7 +38,7 @@ def main(config):
     metric_fns = [getattr(module_metric, met) for met in config['metrics']]
 
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
-    checkpoint = torch.load(config.resume)
+    checkpoint = torch.load(config.resume, map_location=torch.device('cpu') if not torch.cuda.is_available() else None)
     state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
@@ -80,6 +85,10 @@ def main(config):
                 img = output[i,0,:,:]
 
                 maskpred = (img > config["cutoff"]) * 255
+                masktarget = target[i, 0, :, :]
+                
+                dice_err = custom_loss(maskpred, masktarget)
+                print(dice_err)
 
                 # plt.imshow(img, cmap='jet')
                 # plt.show()
@@ -87,7 +96,7 @@ def main(config):
                 fig, axes = plt.subplots(1, 4, figsize=(15, 5), sharex=True, sharey=True)
                 ax = axes.ravel()
 
-                ax[0].imshow(img, cmap=cm.jet)
+                ax[0].imshow(img * (img > config['cutoff']), cmap=cm.jet)
                 ax[0].set_title('Prediction')
 
                 ax[1].imshow(target[i, 0, :, :])
@@ -104,8 +113,8 @@ def main(config):
 
                 plt.tight_layout()
                 plt.show()
-                #plt.savefig("output/" + file.split("/")[-1])
-                plt.close()
+                # #plt.savefig("output/" + file.split("/")[-1])
+                # plt.close()
 
 
 
