@@ -34,3 +34,10 @@ class UNet(BaseModel):
         x = self.up4(x, x1)
         logits = self.outc(x)
         return logits
+
+    def partialForward(self, x, layer = 1):
+        layers = [self.inc, self.down1, self.down2, self.down3, self.down4]
+        for i in range(layer):
+            x = layers[i](x)
+
+        return x
