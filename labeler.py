@@ -11,6 +11,13 @@ from torchvision import transforms
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
+
+def custom_loss(pred, target):
+    iflat = pred.view(-1)
+    tflat = target.view(-1)
+    return 1 - (iflat - iflat * tflat).sum() / (iflat.sum() + 1e-6)
+
+
 def main(config):
     logger = config.get_logger('test')
 
@@ -33,7 +40,7 @@ def main(config):
     metric_fns = [getattr(module_metric, met) for met in config['metrics']]
 
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
-    checkpoint = torch.load(config.resume)
+    checkpoint = torch.load(config.resume, map_location=torch.device('cpu') if not torch.cuda.is_available() else None)
     state_dict = checkpoint['state_dict']
     if config['n_gpu'] > 1:
         model = torch.nn.DataParallel(model)
@@ -50,8 +57,7 @@ def main(config):
     with torch.no_grad():
         for i, (data, target) in enumerate(tqdm(data_loader)):
             data, target = data.to(device), target.to(device)
-            print("will the next function work??") # TODO remove
-            output = model.partialForward(data, 3)
+            output = model(data)
 
             a = output
             b = target
@@ -74,23 +80,48 @@ def main(config):
             # save sample images, or do something with output here
             #
             print(output.shape)
-            for j in range(output.shape[0]):
-                cols = 16
-                rows = 16
-                fig, axes = plt.subplots(rows, cols, figsize=(15,15) ,sharex=True, sharey=True)
+            for i in range(output.shape[0]):
+                # transforms.Normalize(1, 1, inplace=True)(data[i, :, :])
+                # transforms.Normalize(1, 1, inplace=True)(output[i, :, :])
+                img = torch.nn.Softmax2d()(output[i])
+                img = output[i, 0, :, :]
 
-                for a in range(rows):
-                    for b in range(cols):
-                        axes[a,b].imshow(output[j,a*cols + b, :,:], cmap=cm.jet)
+                maskpred = (img > config["cutoff"]) * 255
+                # masktarget = target[i, 0, :, :]
 
+                # dice_err = custom_loss(maskpred, masktarget)
+                # print(dice_err)
+
+                # plt.imshow(img, cmap='jet')
+                # plt.show()
+
+                fig, axes = plt.subplots(1, 4, figsize=(15, 5), sharex=True, sharey=True)
+                ax = axes.ravel()
+
+                ax[0].imshow(img * (img > config['cutoff']), cmap=cm.jet)
+                ax[0].set_title('Prediction')
+
+                ax[1].imshow(target[i, 0, :, :])
+                ax[1].set_title('Target mask')
+
+                ax[2].imshow(maskpred)
+                ax[2].set_title('Pred mask')
+
+                original_input = data[i]
+                original_input = original_input.transpose(0, 2)
+                original_input = original_input.transpose_(0, 1)
+                ax[3].imshow(original_input)
+                ax[3].set_title('Original')
 
                 plt.tight_layout()
                 plt.show()
-                #plt.savefig("output/" + file.split("/")[-1])
-                plt.close()
 
+                yn = input()
+                if(yn == "y"):
+                    print("should be added to the trainset")
 
-
+                # #plt.savefig("output/" + file.split("/")[-1])
+                # plt.close()
 
             # computing loss, metrics on test set
             loss = loss_fn(output, target)
