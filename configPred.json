@@ -27,7 +27,7 @@
     "loss": "bce_loss",
     "cutoff": 0.3,
     "intersectionCount": 4,
-    "numPredictionAdditions": 10,
+    "numPredictionAdditions": 70,
     "metrics": [
         "accuracy", "top_k_acc"
     ],
