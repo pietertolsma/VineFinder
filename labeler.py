@@ -1,6 +1,7 @@
 import argparse
 import datetime
 import os
+import random
 import time
 
 import torch
@@ -33,7 +34,7 @@ def dataloader(img_dir):
     # read image
 
     files = os.listdir(img_dir)
-    file = files[0]
+    file = files[random.randint(1,50)]
 
     print("file: " + file)
 
