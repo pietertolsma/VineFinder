@@ -9,7 +9,7 @@
     "data_loader": {
         "type": "TomatoPredDataLoader",
         "args":{
-            "data_dir": "data/grabpoints/test/images",
+            "data_dir": "data/grabpoints/unpred",
             "batch_size": 2,
             "shuffle": true,
             "validation_split": 0.1,
@@ -27,6 +27,7 @@
     "loss": "bce_loss",
     "cutoff": 0.3,
     "intersectionCount": 4,
+    "numPredictionAdditions": 10,
     "metrics": [
         "accuracy", "top_k_acc"
     ],
