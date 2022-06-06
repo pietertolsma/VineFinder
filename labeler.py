@@ -123,8 +123,8 @@ def main(config):
 
     print(execution_time)
 
-def predImage(i, model, device):
-    datas = dataloader(i, config['data_loader']['args']['data_dir'])
+def predImage(index, model, device):
+    datas = dataloader(index, config['data_loader']['args']['data_dir'])
 
     outs = []
     res = torch.zeros(datas[0].shape[1], datas[0].shape[2])
@@ -161,7 +161,7 @@ def predImage(i, model, device):
     original_input = datas[0]
     original_input = original_input.transpose(0, 2)
     original_input = original_input.transpose_(0, 1)
-    save_image("new_output", original_input.numpy(), intersection.numpy(), f'image_{i}')
+    save_image("new_output", original_input.numpy(), intersection.numpy(), f'image_{index}')
 
 
 def arrToCpu(datas):
