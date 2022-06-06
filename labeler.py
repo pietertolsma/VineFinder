@@ -158,7 +158,7 @@ def main(config):
     ax[0].imshow(result, cmap=cm.jet)
     ax[0].set_title('Intersection')
 
-    ax[1].imshow(ogs[0])
+    ax[1].imshow(intersection)
     ax[1].set_title('Target mask')
 
     ax[2].imshow(ogs[3])
