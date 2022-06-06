@@ -29,12 +29,12 @@ def custom_loss(pred, target):
     return 1 - (iflat - iflat * tflat).sum() / (iflat.sum() + 1e-6)
 
 
-def dataloader(img_dir):
+def dataloader(index, img_dir):
     print(img_dir)
     # read image
 
     files = os.listdir(img_dir)
-    file = files[random.randint(1,50)]
+    file = files[index]
 
     print("file: " + file)
 
@@ -114,7 +114,7 @@ def main(config):
     condition = True
     i = 0
     while(condition and i < config["numPredictionAdditions"]):
-        predImage(model,device)
+        predImage(i, model,device)
         i+=1
 
     end_time = datetime.datetime.now()
@@ -123,8 +123,8 @@ def main(config):
 
     print(execution_time)
 
-def predImage(model, device):
-    datas = dataloader(config['data_loader']['args']['data_dir'])
+def predImage(i, model, device):
+    datas = dataloader(i, config['data_loader']['args']['data_dir'])
 
     outs = []
     res = torch.zeros(datas[0].shape[1], datas[0].shape[2])
@@ -161,7 +161,7 @@ def predImage(model, device):
     original_input = datas[0]
     original_input = original_input.transpose(0, 2)
     original_input = original_input.transpose_(0, 1)
-    save_image("new_output", original_input.numpy(), intersection.numpy(), "firstimg")
+    save_image("new_output", original_input.numpy(), intersection.numpy(), f'image_{i}')
 
 
 def arrToCpu(datas):
