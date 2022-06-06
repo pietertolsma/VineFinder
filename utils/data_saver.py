@@ -3,9 +3,10 @@ import matplotlib.pyplot as plt
 from torchvision import transforms
 from torchvision.io import read_image
 import numpy as np
+import cv2
 import torch
 
-def save_image(folder, original_image, mask):
+def save_image(folder, original_image, mask, filename):
     """
     Saves the original image and the mask to a folder.
     """
@@ -14,25 +15,17 @@ def save_image(folder, original_image, mask):
         os.makedirs(folder + "/images")
         os.makedirs(folder + "/masks")
 
-    print(type(mask))
-    print(mask)
+    # files = os.listdir(f'{folder}/images')
+    # file_count = len(files)
 
-    files = os.listdir(f'{folder}/images')
-    file_count = len(files)
-
-    # original_image = original_image.transpose_(0, 2)
-    # original_image = original_image.transpose_(0, 1)
-    #mask = transforms.ToPILImage(mode="L")(mask*255)
-    # mask = mask.transpose(0, 2)
-    # mask = mask.transpose_(0, 1)
-
-    image_name = f'images/original_image_{file_count}.png'
-    mask_name = f'masks/mask_{file_count}.png'
+    image_name = f'images/{filename}.png'
+    mask_name = f'masks/mask_{filename}.png'
     original_image_path = os.path.join(folder, image_name)
     mask_path = os.path.join(folder, mask_name)
 
     plt.imsave(original_image_path, original_image)
-    plt.imsave(mask_path, mask)
+    cv2.imwrite(mask_path, mask)
+    #plt.imsave(mask_path, mask)
 
 
 # test_image = plt.imread('../data/grabpoints/test/images/image_0_0.png')

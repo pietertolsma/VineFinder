@@ -166,7 +166,7 @@ def main(config):
     original_input = datas[0]
     original_input = original_input.transpose(0, 2)
     original_input = original_input.transpose_(0, 1)
-    save_image("new_output", original_input.numpy(), intersection.numpy())
+    save_image("new_output", original_input.numpy(), intersection.numpy(), "firstimg")
 
     end_time = datetime.datetime.now()
     time_diff = (end_time - start_time)
