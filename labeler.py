@@ -76,24 +76,13 @@ def main(config):
                 data = data.cpu()
             except:
                 data = d
-            #
-            # save sample images, or do something with output here
-            #
+
             print(output.shape)
             for i in range(output.shape[0]):
-                # transforms.Normalize(1, 1, inplace=True)(data[i, :, :])
-                # transforms.Normalize(1, 1, inplace=True)(output[i, :, :])
-                img = torch.nn.Softmax2d()(output[i])
-                img = output[i, 0, :, :]
+                img = torch.nn.Sigmoid()(output[i])[i,0,:,:]
+                # img = output[i, 0, :, :]
 
                 maskpred = (img > config["cutoff"]) * 255
-                # masktarget = target[i, 0, :, :]
-
-                # dice_err = custom_loss(maskpred, masktarget)
-                # print(dice_err)
-
-                # plt.imshow(img, cmap='jet')
-                # plt.show()
 
                 fig, axes = plt.subplots(1, 4, figsize=(15, 5), sharex=True, sharey=True)
                 ax = axes.ravel()

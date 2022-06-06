@@ -79,19 +79,13 @@ def main(config):
             #
             print(output.shape)
             for i in range(output.shape[0]):
-                #transforms.Normalize(1, 1, inplace=True)(data[i, :, :])
-                #transforms.Normalize(1, 1, inplace=True)(output[i, :, :])
-                img = torch.nn.Softmax2d()(output[i])
-                img = output[i,0,:,:]
+                img = torch.nn.Sigmoid()(output[i]).squeeze()
 
                 maskpred = (img > config["cutoff"]) * 255
                 masktarget = target[i, 0, :, :]
                 
                 dice_err = custom_loss(maskpred, masktarget)
                 print(dice_err)
-
-                # plt.imshow(img, cmap='jet')
-                # plt.show()
 
                 fig, axes = plt.subplots(1, 4, figsize=(15, 5), sharex=True, sharey=True)
                 ax = axes.ravel()
@@ -113,11 +107,6 @@ def main(config):
 
                 plt.tight_layout()
                 plt.show()
-                # #plt.savefig("output/" + file.split("/")[-1])
-                # plt.close()
-
-
-
 
             # computing loss, metrics on test set
             loss = loss_fn(output, target)
