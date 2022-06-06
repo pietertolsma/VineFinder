@@ -163,7 +163,10 @@ def main(config):
     datas = arrToCpu(datas)
     ogs = arrToCpu(ogs)
 
-    save_image("new_output", datas[0].numpy(), intersection.numpy())
+    original_input = datas[0]
+    original_input = original_input.transpose(0, 2)
+    original_input = original_input.transpose_(0, 1)
+    save_image("new_output", original_input.numpy(), intersection.numpy())
 
     end_time = datetime.datetime.now()
     time_diff = (end_time - start_time)
@@ -183,9 +186,6 @@ def main(config):
     ax[2].imshow(ogs[3])
     ax[2].set_title('Pred mask')
 
-    original_input = datas[0]
-    original_input = original_input.transpose(0, 2)
-    original_input = original_input.transpose_(0, 1)
     ax[3].imshow(original_input)
     ax[3].set_title('Original')
 

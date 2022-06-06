@@ -22,7 +22,7 @@ def save_image(folder, original_image, mask):
 
     # original_image = original_image.transpose_(0, 2)
     # original_image = original_image.transpose_(0, 1)
-    mask = transforms.ToPILImage(mode="L")(mask*255)
+    #mask = transforms.ToPILImage(mode="L")(mask*255)
     # mask = mask.transpose(0, 2)
     # mask = mask.transpose_(0, 1)
 
