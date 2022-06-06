@@ -121,7 +121,7 @@ def main(config):
     outs = []
     with torch.no_grad():
         for i, data in enumerate(tqdm(datas)):
-            data = data.reshape(1, data.shape[0], data.shape[1], data.shape[2], )
+            data = data.reshape(1, data.shape[0], data.shape[1], data.shape[2])
             data = data.to(device)
             output = model(data)
             a = output
