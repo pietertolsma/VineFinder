@@ -17,6 +17,8 @@ import numpy as np
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
+from utils.data_saver import save_image
+
 
 def custom_loss(pred, target):
     iflat = pred.view(-1)
@@ -139,7 +141,7 @@ def main(config):
     for i in range(len(ogs)):
         assert (ogs[0].shape == ogs[i].shape)
 
-    displayPredictions(ogs)
+   # displayPredictions(ogs)
 
     for o in ogs:
         for i in range(result.shape[0]):
@@ -147,6 +149,12 @@ def main(config):
                 result[i, j] += o[i, j] > config["cutoff"]
 
     intersection = result > config["intersectionCount"]
+
+    print(intersection.shape)
+    original_input = datas[0]
+    original_input = original_input.transpose(0, 2)
+    original_input = original_input.transpose_(0, 1)
+    save_image("new_output", original_input.cpu().detach().numpy(), torch.Tensor(intersection))
 
     # result *= 32
     print(result.shape)
@@ -164,9 +172,6 @@ def main(config):
     ax[2].imshow(ogs[3])
     ax[2].set_title('Pred mask')
 
-    original_input = datas[0]
-    original_input = original_input.transpose(0, 2)
-    original_input = original_input.transpose_(0, 1)
     ax[3].imshow(original_input)
     ax[3].set_title('Original')
 
