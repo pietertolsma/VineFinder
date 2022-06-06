@@ -9,8 +9,8 @@
     "data_loader": {
         "type": "TomatoDataLoader",
         "args":{
-            "data_dir": "data/tomatoes/train",
-            "batch_size": 3,
+            "data_dir": "data/grabpoints/train",
+            "batch_size": 2,
             "shuffle": true,
             "validation_split": 0.1,
             "num_workers": 3

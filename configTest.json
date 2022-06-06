@@ -10,6 +10,7 @@
         "type": "TomatoDataLoader",
         "args":{
             "data_dir": "data/grabpoints/test",
+            "label_dir": "data/grabpoints/unpred",
             "batch_size": 3,
             "shuffle": true,
             "validation_split": 0.1,

@@ -1,4 +1,6 @@
 import argparse
+import os
+
 import torch
 from tqdm import tqdm
 import data_loader.data_loaders as module_data
@@ -7,6 +9,7 @@ import model.metric as module_metric
 import model.model as module_arch
 from parse_config import ConfigParser
 from torchvision import transforms
+from PIL import Image
 
 from matplotlib import cm
 import matplotlib.pyplot as plt
@@ -17,6 +20,23 @@ def custom_loss(pred, target):
     tflat = target.view(-1)
     return 1 - (iflat - iflat * tflat).sum() / (iflat.sum() + 1e-6)
 
+def dataloader(img_dir):
+    print(img_dir)
+    #read image
+
+    files = os.listdir(img_dir)
+    file = files[0]
+
+    print("file: " + file)
+
+    img = Image.open(file)
+    print(img)
+    #rotate 90,180 and 270 deg
+    #for each of those
+        #flip vertically
+        #flip horizontally
+
+    return
 
 def main(config):
     logger = config.get_logger('test')
@@ -76,13 +96,17 @@ def main(config):
                 data = data.cpu()
             except:
                 data = d
-
+            #
+            # save sample images, or do something with output here
+            #
             print(output.shape)
             for i in range(output.shape[0]):
-                img = torch.nn.Sigmoid()(output[i])[i,0,:,:]
-                # img = output[i, 0, :, :]
+                img = torch.nn.Sigmoid()(output[i]).squeeze()
 
                 maskpred = (img > config["cutoff"]) * 255
+
+                dice_err = custom_loss(maskpred)
+                print(dice_err)
 
                 fig, axes = plt.subplots(1, 4, figsize=(15, 5), sharex=True, sharey=True)
                 ax = axes.ravel()
@@ -104,13 +128,6 @@ def main(config):
 
                 plt.tight_layout()
                 plt.show()
-
-                yn = input()
-                if(yn == "y"):
-                    print("should be added to the trainset")
-
-                # #plt.savefig("output/" + file.split("/")[-1])
-                # plt.close()
 
             # computing loss, metrics on test set
             loss = loss_fn(output, target)
@@ -137,4 +154,5 @@ if __name__ == '__main__':
                       help='indices of GPUs to enable (default: all)')
 
     config = ConfigParser.from_args(args)
-    main(config)
+    # main(config)
+    dataloader(config["data_loader"]["args"]["label_dir"])
