@@ -56,7 +56,7 @@ def dataloader(img_dir):
         out.append(transforms.functional.hflip(img))
         # flip horizontally
         out.append(transforms.functional.vflip(img))
-    # visualizeRotations(out)
+    displayInputs(out)
     return out
 
 def inverseAugmentation(datas):
@@ -133,6 +133,7 @@ def main(config):
 
             outs.append(output)
 
+    displayPredictions(outs)
     ogs = inverseAugmentation(outs)
     result = np.zeros((ogs[0].shape))
     for i in range(len(ogs)):
@@ -186,7 +187,24 @@ def displayPredictions(datas):
     for a in range(rows):
         for b in range(cols):
             if a * cols + b < len(datas):
-                axes[a, b].imshow(datas[a * cols + b], cmap=cm.jet)
+                axes[a, b].imshow(datas[a * cols + b].squeeze(), cmap=cm.jet)
+
+    plt.tight_layout()
+    plt.show()
+    plt.close()
+
+def displayInputs(datas):
+    cols = 4
+    rows = 3
+    fig, axes = plt.subplots(rows, cols, figsize=(15, 15), sharex=True, sharey=True)
+
+    for a in range(rows):
+        for b in range(cols):
+            if a * cols + b < len(datas):
+                original_input = datas[a * cols + b]
+                original_input = original_input.transpose(0, 2)
+                original_input = original_input.transpose_(0, 1)
+                axes[a, b].imshow(original_input)
 
     plt.tight_layout()
     plt.show()
