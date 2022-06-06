@@ -111,7 +111,19 @@ def main(config):
     model = model.to(device)
 
     start_time = datetime.datetime.now()
+    condition = True
+    i = 0
+    while(condition and i < config["numPredictionAdditions"]):
+        predImage(model,device)
+        i+=1
 
+    end_time = datetime.datetime.now()
+    time_diff = (end_time - start_time)
+    execution_time = time_diff.total_seconds() * 1000
+
+    print(execution_time)
+
+def predImage(model, device):
     datas = dataloader(config['data_loader']['args']['data_dir'])
 
     outs = []
@@ -151,11 +163,6 @@ def main(config):
     original_input = original_input.transpose_(0, 1)
     save_image("new_output", original_input.numpy(), intersection.numpy())
 
-    end_time = datetime.datetime.now()
-    time_diff = (end_time - start_time)
-    execution_time = time_diff.total_seconds() * 1000
-
-    print(execution_time)
 
 def arrToCpu(datas):
     out = []
