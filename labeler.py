@@ -19,6 +19,8 @@ import numpy as np
 from matplotlib import cm
 import matplotlib.pyplot as plt
 
+from utils.data_saver import save_image
+
 
 def custom_loss(pred, target):
     iflat = pred.view(-1)
@@ -160,6 +162,8 @@ def main(config):
 
     datas = arrToCpu(datas)
     ogs = arrToCpu(ogs)
+
+    save_image("new_output", original_input.cpu().detach().numpy(), torch.Tensor(intersection))
 
     end_time = datetime.datetime.now()
     time_diff = (end_time - start_time)
