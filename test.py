@@ -7,6 +7,7 @@ import model.metric as module_metric
 import model.model as module_arch
 from parse_config import ConfigParser
 from torchvision import transforms
+import torchvision.transforms.functional as F
 
 from matplotlib import cm
 import matplotlib.pyplot as plt
@@ -79,7 +80,8 @@ def main(config):
             #
             print(output.shape)
             for i in range(output.shape[0]):
-                img = torch.nn.Sigmoid()(output[i]).squeeze()
+                # img = torch.nn.Sigmoid()(output[i]).squeeze()
+                img = output[i].squeeze()
 
                 maskpred = (img > config["cutoff"]) * 255
                 masktarget = target[i, 0, :, :]
@@ -90,7 +92,7 @@ def main(config):
                 fig, axes = plt.subplots(1, 4, figsize=(15, 5), sharex=True, sharey=True)
                 ax = axes.ravel()
 
-                ax[0].imshow(img * (img > config['cutoff']), cmap=cm.jet)
+                ax[0].imshow(img, cmap=cm.jet)
                 ax[0].set_title('Prediction')
 
                 ax[1].imshow(target[i, 0, :, :])

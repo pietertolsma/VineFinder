@@ -7,9 +7,12 @@ import data_loader.data_loaders as module_data
 import model.loss as module_loss
 import model.metric as module_metric
 import model.model as module_arch
+from data_loader.labeler_loader import PadImage, TomatoPredDataLoader
 from parse_config import ConfigParser
 from torchvision import transforms
 from PIL import Image
+import torchvision.transforms.functional as F
+import numpy as np
 
 from matplotlib import cm
 import matplotlib.pyplot as plt
@@ -29,27 +32,63 @@ def dataloader(img_dir):
 
     print("file: " + file)
 
-    img = Image.open(file)
+    img = Image.open(img_dir + "/" + file)
     print(img)
-    #rotate 90,180 and 270 deg
-    #for each of those
-        #flip vertically
-        #flip horizontally
+    transform = transforms.Compose([
+        transforms.PILToTensor(),
+        PadImage()
+    ])
 
-    return
+    img = transform(img)
+    imgs = [img]
+    #rotate 90,180 and 270 deg
+    for i in range(3):
+        imma = F.rotate(imgs[0],90*i)
+        imgs.append(imma)
+
+    assert(len(imgs) == 4)
+    out = []
+    #for each of those
+    for img in imgs:
+        out.append(img)
+        #flip vertically
+        out.append(transforms.functional.hflip(img))
+        #flip horizontally
+        out.append(transforms.functional.vflip(img))
+
+    return out
+
+def inverseAugmentation(datas):
+    out = []
+    for i in range(len(datas),step=3):
+        out.append(F.rotate(datas[i], -i*30))#looks strange but at i=0 give 0deg, i=3 give 90deg etc
+        out.append(F.rotate(F.hflip(datas[i]),-i*30))
+        out.append(F.rotate(F.vflip(datas[i]),-i*30))
+
+    return out
+
+#TODO: Doesn't work for reasons unkown to mankind
+def visualizeRotations(imgs):
+    cols = 6
+    rows = 2
+    fig, axes = plt.subplots(rows, cols, figsize=(150, 150), sharex=True, sharey=True)
+
+    for a in range(rows):
+        for b in range(cols):
+            axes[a, b].imshow(imgs[b * cols + a][0,:,:], cmap=cm.jet)
+
+    plt.tight_layout()
+    plt.show()
+    # plt.savefig("output/" + file.split("/")[-1])
+    plt.close()
+
 
 def main(config):
     logger = config.get_logger('test')
 
     # setup data_loader instances
-    data_loader = getattr(module_data, config['data_loader']['type'])(
-        config['data_loader']['args']['data_dir'],
-        batch_size=3,
-        shuffle=False,
-        validation_split=0.0,
-        training=False,
-        num_workers=2
-    )
+    file = os.path.join(config['data_loader']['args']['data_dir'], os.listdir(config['data_loader']['args']['data_dir'])[0])
+    # data_loader = TomatoPredDataLoader(path=file,batch_size=2,shuffle=False)
 
     # build model architecture
     model = config.init_obj('arch', module_arch)
@@ -74,69 +113,29 @@ def main(config):
     total_loss = 0.0
     total_metrics = torch.zeros(len(metric_fns))
 
-    with torch.no_grad():
-        for i, (data, target) in enumerate(tqdm(data_loader)):
-            data, target = data.to(device), target.to(device)
-            output = model(data)
+    datas = dataloader(config['data_loader']['args']['data_dir'])
 
+    outs = []
+    with torch.no_grad():
+        for i, data in enumerate(tqdm(datas)):
+            data, target = data.to(device)
+            output = model(data)
             a = output
-            b = target
             d = data
             try:
                 output = output.cpu()
             except:
                 output = a
 
-            try:
-                target = target.cpu()
-            except:
-                target = b
+            outs.append(output)
 
-            try:
-                data = data.cpu()
-            except:
-                data = d
-            #
-            # save sample images, or do something with output here
-            #
-            print(output.shape)
-            for i in range(output.shape[0]):
-                img = torch.nn.Sigmoid()(output[i]).squeeze()
+    ogs = inverseAugmentation(outs)
+    result = np.zeros((ogs[0].shape))
+    for i in range(ogs):
 
-                maskpred = (img > config["cutoff"]) * 255
 
-                dice_err = custom_loss(maskpred)
-                print(dice_err)
 
-                fig, axes = plt.subplots(1, 4, figsize=(15, 5), sharex=True, sharey=True)
-                ax = axes.ravel()
-
-                ax[0].imshow(img * (img > config['cutoff']), cmap=cm.jet)
-                ax[0].set_title('Prediction')
-
-                ax[1].imshow(target[i, 0, :, :])
-                ax[1].set_title('Target mask')
-
-                ax[2].imshow(maskpred)
-                ax[2].set_title('Pred mask')
-
-                original_input = data[i]
-                original_input = original_input.transpose(0, 2)
-                original_input = original_input.transpose_(0, 1)
-                ax[3].imshow(original_input)
-                ax[3].set_title('Original')
-
-                plt.tight_layout()
-                plt.show()
-
-            # computing loss, metrics on test set
-            loss = loss_fn(output, target)
-            batch_size = data.shape[0]
-            total_loss += loss.item() * batch_size
-            for i, metric in enumerate(metric_fns):
-                total_metrics[i] += metric(output, target) * batch_size
-
-    n_samples = len(data_loader.sampler)
+    n_samples = len(datas)
     log = {'loss': total_loss / n_samples}
     log.update({
         met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
@@ -154,5 +153,5 @@ if __name__ == '__main__':
                       help='indices of GPUs to enable (default: all)')
 
     config = ConfigParser.from_args(args)
-    # main(config)
-    dataloader(config["data_loader"]["args"]["label_dir"])
+    main(config)
+    # dataloader(config["data_loader"]["args"]["label_dir"])

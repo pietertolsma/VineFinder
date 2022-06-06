@@ -7,14 +7,13 @@
         "args": {}
     },
     "data_loader": {
-        "type": "TomatoDataLoader",
+        "type": "TomatoPredDataLoader",
         "args":{
-            "data_dir": "data/grabpoints/test",
-            "label_dir": "data/grabpoints/unpred",
-            "batch_size": 3,
+            "data_dir": "data/grabpoints/unpred",
+            "batch_size": 2,
             "shuffle": true,
             "validation_split": 0.1,
-            "num_workers": 2
+            "num_workers": 3
         }
     },
     "optimizer": {
@@ -26,7 +25,6 @@
         }
     },
     "loss": "bce_loss",
-    "cutoff": -0.1,
     "metrics": [
         "accuracy", "top_k_acc"
     ],
@@ -43,7 +41,7 @@
         "save_dir": "saved/",
         "save_period": 5,
         "verbosity": 2,
-
+        
         "monitor": "min val_loss",
         "early_stop": 10,
 
