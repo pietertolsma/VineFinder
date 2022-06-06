@@ -1,5 +1,7 @@
 import argparse
+import datetime
 import os
+import time
 
 import torch
 from tqdm import tqdm
@@ -116,46 +118,59 @@ def main(config):
     total_loss = 0.0
     total_metrics = torch.zeros(len(metric_fns))
 
+    start_time = datetime.datetime.now()
+
     datas = dataloader(config['data_loader']['args']['data_dir'])
 
     outs = []
+    res = torch.zeros(datas[0].shape[1], datas[0].shape[2])
+    resGpu = res.to(device)
     with torch.no_grad():
         for i, data in enumerate(tqdm(datas)):
             data = data.reshape(1, data.shape[0], data.shape[1], data.shape[2])
             data = data.to(device)
             output = model(data)
-            a = output
-            d = data
-            try:
-                output = output.cpu()
-            except:
-                output = a
 
             outs.append(output)
 
     # displayPredictions(outs)
+    outs = arrToCpu(outs)
     ogs = inverseAugmentation(outs)
-    result = np.zeros((ogs[0].shape))
+
     for i in range(len(ogs)):
         assert (ogs[0].shape == ogs[i].shape)
 
-    displayPredictions(ogs)
+    ogs = arrToGpu(ogs, device)
 
     for o in ogs:
-        for i in range(result.shape[0]):
-            for j in range(result.shape[1]):
-                result[i, j] += o[i, j] > config["cutoff"]
+        o = o.squeeze()
+        threshold = torch.where(o > config["cutoff"], 1,0)
+        resGpu.add_(threshold)
 
-    intersection = result > config["intersectionCount"]
+    resGpu = torch.where(resGpu > config["intersectionCount"],1,0)
 
-    # result *= 32
-    print(result.shape)
-    print(ogs[0].shape)
+    # displayPredictions(ogs)
+
+    intersection = resGpu
+    i = resGpu
+    try:
+        intersection = resGpu.cpu()
+    except:
+        intersection = i
+
+    datas = arrToCpu(datas)
+    ogs = arrToCpu(ogs)
+
+    end_time = datetime.datetime.now()
+    time_diff = (end_time - start_time)
+    execution_time = time_diff.total_seconds() * 1000
+
+    print(execution_time)
 
     fig, axes = plt.subplots(1, 4, figsize=(15, 5), sharex=True, sharey=True)
     ax = axes.ravel()
 
-    ax[0].imshow(result, cmap=cm.jet)
+    ax[0].imshow(intersection, cmap=cm.jet)
     ax[0].set_title('Intersection')
 
     ax[1].imshow(intersection)
@@ -180,6 +195,26 @@ def main(config):
         met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
     })
     logger.info(log)
+
+def arrToCpu(datas):
+    out = []
+    for d in datas:
+        a = d
+        try:
+            d = d.cpu()
+        except:
+            d = a
+
+        out.append(d)
+    return out
+
+def arrToGpu(datas, device):
+    out = []
+    for d in datas:
+        d = d.to(device)
+
+        out.append(d)
+    return out
 
 def displayPredictions(datas):
     cols = 4
