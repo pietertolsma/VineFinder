@@ -40,7 +40,7 @@ def dataloader(img_dir):
         PadImage()
     ])
 
-    img = transform(img)
+    img = transform(img)/255
     imgs = [img]
     # rotate 90,180 and 270 deg
     for i in range(1,4):
@@ -56,7 +56,7 @@ def dataloader(img_dir):
         out.append(transforms.functional.hflip(img))
         # flip horizontally
         out.append(transforms.functional.vflip(img))
-    displayInputs(out)
+    # displayInputs(out)
     return out
 
 def inverseAugmentation(datas):
@@ -133,7 +133,7 @@ def main(config):
 
             outs.append(output)
 
-    displayPredictions(outs)
+    # displayPredictions(outs)
     ogs = inverseAugmentation(outs)
     result = np.zeros((ogs[0].shape))
     for i in range(len(ogs)):
@@ -146,7 +146,9 @@ def main(config):
             for j in range(result.shape[1]):
                 result[i, j] += o[i, j] > config["cutoff"]
 
-    result *= 32
+    intersection = result > config["intersectionCount"]
+
+    # result *= 32
     print(result.shape)
     print(ogs[0].shape)
 

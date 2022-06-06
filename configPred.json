@@ -26,6 +26,7 @@
     },
     "loss": "bce_loss",
     "cutoff": 0.3,
+    "intersectionCount": 4,
     "metrics": [
         "accuracy", "top_k_acc"
     ],
