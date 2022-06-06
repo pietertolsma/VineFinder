@@ -14,18 +14,21 @@ def save_image(folder, original_image, mask, filename):
         os.makedirs(folder)
         os.makedirs(folder + "/images")
         os.makedirs(folder + "/masks")
+        os.makedirs(folder + "/visible_masks")
 
     # files = os.listdir(f'{folder}/images')
     # file_count = len(files)
 
     image_name = f'images/{filename}.png'
     mask_name = f'masks/mask_{filename}.png'
+    visible_mask_name = f'visible_masks/mask_{filename}.png'
     original_image_path = os.path.join(folder, image_name)
     mask_path = os.path.join(folder, mask_name)
+    visible_mask_path = os.path.join(folder, visible_mask_name)
 
     plt.imsave(original_image_path, original_image)
     cv2.imwrite(mask_path, mask)
-    #plt.imsave(mask_path, mask)
+    plt.imsave(visible_mask_path, mask)
 
 
 # test_image = plt.imread('../data/grabpoints/test/images/image_0_0.png')
