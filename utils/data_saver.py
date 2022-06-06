@@ -14,12 +14,15 @@ def save_image(folder, original_image, mask):
         os.makedirs(folder + "/images")
         os.makedirs(folder + "/masks")
 
+    print(type(mask))
+    print(mask)
+
     files = os.listdir(f'{folder}/images')
     file_count = len(files)
 
     # original_image = original_image.transpose_(0, 2)
     # original_image = original_image.transpose_(0, 1)
-    mask = transforms.ToPILImage(mode='L')(mask)
+    mask = transforms.ToPILImage(mode="L")(mask*255)
     # mask = mask.transpose(0, 2)
     # mask = mask.transpose_(0, 1)
 

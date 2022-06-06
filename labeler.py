@@ -163,7 +163,7 @@ def main(config):
     datas = arrToCpu(datas)
     ogs = arrToCpu(ogs)
 
-    save_image("new_output", original_input.cpu().detach().numpy(), torch.Tensor(intersection))
+    save_image("new_output", datas[0].numpy(), intersection.numpy())
 
     end_time = datetime.datetime.now()
     time_diff = (end_time - start_time)
