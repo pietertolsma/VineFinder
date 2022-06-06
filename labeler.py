@@ -93,18 +93,11 @@ def visualizeRotations(imgs):
 def main(config):
     logger = config.get_logger('test')
 
-    # setup data_loader instances
-    file = os.path.join(config['data_loader']['args']['data_dir'],
-                        os.listdir(config['data_loader']['args']['data_dir'])[0])
-    # data_loader = TomatoPredDataLoader(path=file,batch_size=2,shuffle=False)
-
     # build model architecture
     model = config.init_obj('arch', module_arch)
     logger.info(model)
 
     # get function handles of loss and metrics
-    loss_fn = getattr(module_loss, config['loss'])
-    metric_fns = [getattr(module_metric, met) for met in config['metrics']]
 
     logger.info('Loading checkpoint: {} ...'.format(config.resume))
     checkpoint = torch.load(config.resume, map_location=torch.device('cpu') if not torch.cuda.is_available() else None)
@@ -116,10 +109,6 @@ def main(config):
     # prepare model for testing
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model = model.to(device)
-    model.eval()
-
-    total_loss = 0.0
-    total_metrics = torch.zeros(len(metric_fns))
 
     start_time = datetime.datetime.now()
 
@@ -136,13 +125,8 @@ def main(config):
 
             outs.append(output)
 
-    # displayPredictions(outs)
     outs = arrToCpu(outs)
     ogs = inverseAugmentation(outs)
-
-    for i in range(len(ogs)):
-        assert (ogs[0].shape == ogs[i].shape)
-
     ogs = arrToGpu(ogs, device)
 
     for o in ogs:
@@ -151,8 +135,6 @@ def main(config):
         resGpu.add_(threshold)
 
     resGpu = torch.where(resGpu > config["intersectionCount"],1,0)
-
-    # displayPredictions(ogs)
 
     intersection = resGpu
     i = resGpu
@@ -174,32 +156,6 @@ def main(config):
     execution_time = time_diff.total_seconds() * 1000
 
     print(execution_time)
-
-    fig, axes = plt.subplots(1, 4, figsize=(15, 5), sharex=True, sharey=True)
-    ax = axes.ravel()
-
-    ax[0].imshow(intersection, cmap=cm.jet)
-    ax[0].set_title('Intersection')
-
-    ax[1].imshow(intersection)
-    ax[1].set_title('Target mask')
-
-    ax[2].imshow(ogs[3])
-    ax[2].set_title('Pred mask')
-
-    ax[3].imshow(original_input)
-    ax[3].set_title('Original')
-
-    plt.tight_layout()
-    plt.show()
-
-    # print(result)
-    n_samples = len(datas)
-    log = {'loss': total_loss / n_samples}
-    log.update({
-        met.__name__: total_metrics[i].item() / n_samples for i, met in enumerate(metric_fns)
-    })
-    logger.info(log)
 
 def arrToCpu(datas):
     out = []
@@ -264,4 +220,3 @@ if __name__ == '__main__':
 
     config = ConfigParser.from_args(args)
     main(config)
-    # dataloader(config["data_loader"]["args"]["label_dir"])
